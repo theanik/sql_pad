@@ -1,0 +1,74 @@
+version: '3'
+ 
+services:
+  mysql_db:
+    image: mysql
+    container_name: mysql_pad
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: pad1
+      MYSQL_USER: user1
+      MYSQL_PASSWORD: pass
+    ports:
+      - "7000:3306"
+    volumes:
+      - ./mysql_data:/var/lib/mysql
+    networks:
+      - mysql-db
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: pma
+    links:
+      - mysql_db
+    environment:
+      PMA_HOST: mysql_db
+      PMA_PORT: 3306
+      PMA_ARBITRARY: 1
+    restart: always
+    ports:
+      - 3000:80
+    networks:
+      - mysql-db
+# Postgres sql
+  postgres_db:
+    container_name: postgres_pad
+    image: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres123
+      POSTGRES_DB: pgpad1
+    volumes:
+       - ./postgres_data:/data/postgres
+    ports:
+      - "7001:5432"
+    networks:
+      - postgres
+    restart: unless-stopped
+  
+  pgadmin4:
+    container_name: pgadmin_container
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: anik@aa.aa
+      PGADMIN_DEFAULT_PASSWORD: pass
+      # PGADMIN_CONFIG_SERVER_MODE: 'False'
+      # PGADMIN_LISTEN_PORT: 5050
+    volumes:
+       - ./pgadmin:/var/lib/pgadmin
+    ports:
+      - "5050:80"
+    networks:
+      - postgres
+    restart: always
+
+networks:
+  mysql-db:
+    driver: bridge
+  postgres:
+    driver: bridge
+
+volumes:
+    postgres_data:
+    pgadmin:
+    mysql_data:
